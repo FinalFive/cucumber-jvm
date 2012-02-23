@@ -18,11 +18,24 @@ import java.util.Stack;
 import static java.util.Arrays.asList;
 
 public class Main {
-    private static final String USAGE = "TODO - Write the help";
-    static final String VERSION = ResourceBundle.getBundle("cucumber.version").getString("cucumber-jvm.version");
 
     public static void main(String[] argv) throws Throwable {
         run(argv, Thread.currentThread().getContextClassLoader(), new DefaultRuntimeFactory());
+    }
+
+    public static void alternative_main(String[] args) {
+        alternative_run(args, new DefaultCucumberEngine(Thread.currentThread().getContextClassLoader(), new DefaultRuntimeFactory()));
+    }
+
+    public static void alternative_run(String[] args, CucumberEngine cucumberEngine) {
+
+        String version = ResourceBundle.getBundle("cucumber.version").getString("cucumber-jvm.version");
+
+        CliArgsValidator argsValidator = new CliArgsValidator(args, new MessageOutputter(), new ProcessExit(), version);
+
+        argsValidator.processAnyOneOffArgs();
+
+        cucumberEngine.process(args);
     }
 
     public static void run(String[] argv, ClassLoader classLoader, RuntimeFactory runtimeFactory) throws IOException {
@@ -40,16 +53,7 @@ public class Main {
         while (!args.isEmpty()) {
             String arg = args.remove(0);
 
-            if (arg.equals("--help") || arg.equals("-h")) {
-                System.out.println(USAGE);
-                System.exit(0);
-            } else if (arg.equals("--version") || arg.equals("-v")) {
-                System.out.println(VERSION);
-                System.exit(0);
-            } else if (arg.equals("--glue") || arg.equals("-g")) {
-                String gluePath = args.remove(0);
-                gluePaths.add(gluePath);
-            } else if (arg.equals("--tags") || arg.equals("-t")) {
+            if (arg.equals("--tags") || arg.equals("-t")) {
                 filters.add(args.remove(0));
             } else if (arg.equals("--format") || arg.equals("-f")) {
                 format.push(args.remove(0));
